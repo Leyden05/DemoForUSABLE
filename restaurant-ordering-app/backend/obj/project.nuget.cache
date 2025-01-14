@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "C/Szw1rqISQ=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Leyden\\bootcamp\\Projects\\DemoForUSABLE\\restaurant-ordering-app\\backend\\backend.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Leyden\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.0\\microsoft.aspnetcore.openapi.9.0.0.nupkg.sha512",
+    "C:\\Users\\Leyden\\.nuget\\packages\\microsoft.openapi\\1.6.17\\microsoft.openapi.1.6.17.nupkg.sha512"
+  ],
+  "logs": []
+}
