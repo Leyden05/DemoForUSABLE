@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
+    "baseUrl": ".", // Base URL is the frontend root
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"] // Maps '@' to the root of the frontend folder
     }
-  }
+  },
+  "include": ["**/*"]
 }

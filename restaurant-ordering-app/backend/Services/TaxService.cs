@@ -1,21 +1,20 @@
 using RestaurantOrderingApp.Backend.Models;
+
 public class TaxService
 {
     public decimal ApplyTaxes(decimal subtotal, List<Tax> taxes)
     {
-        decimal totalTaxRate = 0;
-        
-        // Sum up all the taxes
+        decimal totalWithTax = subtotal;
+
         foreach (var tax in taxes)
         {
-            totalTaxRate += tax.Percentage;
+            // Calculate the tax amount for the current tax
+            tax.CalculatedAmount = subtotal * (tax.Percentage / 100);
+
+            // Add the calculated tax amount to the running total
+            totalWithTax += tax.CalculatedAmount;
         }
-        
-        // Apply the total tax rate
-        decimal taxAmount = subtotal * (totalTaxRate / 100);
-        decimal totalWithTax = subtotal + taxAmount;
-        
+
         return totalWithTax;
     }
 }
-

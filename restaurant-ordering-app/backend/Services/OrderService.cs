@@ -18,6 +18,12 @@ public class OrderService
         // Validate the order
         _orderValidationService.ValidateOrder(order);
 
+         // Enforce the "only one discount" rule
+        if (order.DiscountAmount > 0 && discount != null)
+        {
+            throw new InvalidOperationException("Only one discount can be applied to an order.");
+        }
+
         // Apply the discount (if any)
         decimal subtotalAfterDiscount = _discountService.ApplyDiscount(order, discount);
 
