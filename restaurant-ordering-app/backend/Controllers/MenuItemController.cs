@@ -10,7 +10,7 @@ namespace RestaurantOrderingApp.Backend.Controllers
         private static readonly List<MenuItem> MenuItems = new()
         {
             new MenuItem { Id = 1, Name = "Hamburger", Quantity = 1, Price = 10.00m },
-            new MenuItem { Id = 2, Name = "Fries",     Quantity = 2, Price = 5.00m }
+            new MenuItem { Id = 2, Name = "Fries", Quantity = 2, Price = 5.00m }
         };
 
         [HttpGet]

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 // Mock API URL
 const API_BASE_URL = "http://localhost:5199/api";
@@ -10,6 +11,7 @@ export default function PlaceOrder() {
   const [selectedItems, setSelectedItems] = useState({});
   const [discounts, setDiscounts] = useState([]);
   const [selectedDiscount, setSelectedDiscount] = useState(null);
+  const router = useRouter();
   const [totals, setTotals] = useState({
     subtotal: 0,
     discountAmount: 0,
@@ -42,7 +44,8 @@ export default function PlaceOrder() {
     const subtotal = Object.entries(selectedItems).reduce(
       (total, [id, quantity]) =>
         total +
-        quantity * (menuItems.find((item) => item.id === parseInt(id))?.price || 0),
+        quantity *
+          (menuItems.find((item) => item.id === parseInt(id))?.price || 0),
       0
     );
     const discountAmount = selectedDiscount
@@ -65,27 +68,46 @@ export default function PlaceOrder() {
 
   const handleSubmitOrder = async () => {
     const order = {
-      items: Object.entries(selectedItems).map(([id, quantity]) => ({
-        id: parseInt(id),
-        quantity,
-      })),
-      discountId: selectedDiscount?.id || null,
+      date: new Date().toISOString(), // Current date and time
+      serverName: "Steve", // Example server name (replace with dynamic input if needed)
+      items: Object.entries(selectedItems).map(([id, quantity]) => {
+        const item = menuItems.find((menuItem) => menuItem.id === parseInt(id));
+        return {
+          id: parseInt(id),
+          name: item?.name || "Unknown Item", // Include item name for clarity
+          price: item?.price || 0, // Include item price for clarity
+          quantity,
+        };
+      }),
+      subtotal: totals.subtotal,
+      discountAmount: totals.discountAmount,
+      preTaxTotal: totals.preTaxTotal,
+      taxAmount: totals.taxAmount,
+      total: totals.total,
+      taxRate: 8, // Replace with your actual tax rate or make it dynamic
     };
+
     try {
-      const response = await fetch(`${API_BASE_URL}/orders`, {
+      console.log("Order Payload:", JSON.stringify(order, null, 2)); // Log payload for debugging
+
+      const response = await fetch(`${API_BASE_URL}/order`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(order),
       });
+
       if (response.ok) {
         alert("Order placed successfully!");
         setSelectedItems({});
         setSelectedDiscount(null);
       } else {
+        const errorDetails = await response.json();
+        console.error("Order Submission Error:", errorDetails);
         alert("Failed to place the order.");
       }
     } catch (error) {
       console.error("Error:", error.message);
+      alert("An error occurred while placing the order.");
     }
   };
 
@@ -96,13 +118,20 @@ export default function PlaceOrder() {
         <div>
           <h2 className="text-xl font-semibold">Menu Items</h2>
           {menuItems.map((item) => (
-            <div key={item.id} className="flex justify-between items-center my-2">
-              <span>{item.name} (${item.price.toFixed(2)})</span>
+            <div
+              key={item.id}
+              className="flex justify-between items-center my-2"
+            >
+              <span>
+                {item.name} (${item.price.toFixed(2)})
+              </span>
               <input
                 type="number"
                 min="0"
                 value={selectedItems[item.id] || 0}
-                onChange={(e) => handleItemChange(item.id, parseInt(e.target.value) || 0)}
+                onChange={(e) =>
+                  handleItemChange(item.id, parseInt(e.target.value) || 0)
+                }
                 className="w-16 border p-1"
               />
             </div>
@@ -135,6 +164,12 @@ export default function PlaceOrder() {
             className="mt-4 p-2 bg-blue-500 text-white w-full"
           >
             Submit Order
+          </button>
+          <button
+            onClick={() => router.push("/orders")}
+            className="mt-4 p-2 bg-green-500 text-white w-full"
+          >
+            View All Orders
           </button>
         </div>
       </div>
