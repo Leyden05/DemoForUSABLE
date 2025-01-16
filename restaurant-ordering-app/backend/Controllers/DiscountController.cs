@@ -9,8 +9,9 @@ namespace RestaurantOrderingApp.Backend.Controllers
     {
         private static readonly List<Discount> Discounts = new()
         {
-            new Discount { Id = 1, Name = "Veteran's Discount", IsPercentage = true,  Amount = 10 },
-            new Discount { Id = 2, Name = "Night Owl Discount", IsPercentage = false, Amount = 2  }
+            new Discount { Id = 1, Name = "Hire Jeremy Discount", IsPercentage = true,  Amount = 50 },
+            new Discount { Id = 2, Name = "Veteran's Discount", IsPercentage = false, Amount = 5 },
+            new Discount { Id = 3, Name = "Early Bird Special", IsPercentage = true, Amount = 10 }
         };
 
         [HttpGet]

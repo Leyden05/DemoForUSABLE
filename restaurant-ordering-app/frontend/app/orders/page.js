@@ -35,7 +35,7 @@ export default function Orders() {
           >
             <h2 className="text-xl font-bold mb-2">Order #{order.id}</h2>
             <p className="text-gray-600 mb-1">Date: {new Date(order.date).toLocaleString()}</p>
-            <p className="text-gray-600 mb-1">Server: {order.serverName || "N/A"}</p>
+            <p className="text-gray-600">Server: {order.serverName}</p>
             <p className="text-gray-600 mb-1">Subtotal: ${order.subtotal.toFixed(2)}</p>
             <p className="text-gray-600 mb-1">Discount: -${order.discountAmount.toFixed(2)}</p>
             <p className="text-gray-600 mb-1">Tax: ${order.taxAmount.toFixed(2)}</p>

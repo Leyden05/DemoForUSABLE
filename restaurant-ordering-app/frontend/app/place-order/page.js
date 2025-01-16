@@ -11,6 +11,8 @@ export default function PlaceOrder() {
   const [selectedItems, setSelectedItems] = useState({});
   const [discounts, setDiscounts] = useState([]);
   const [selectedDiscount, setSelectedDiscount] = useState(null);
+  const [employees, setEmployees] = useState([]); // For employee data
+  const [selectedEmployee, setSelectedEmployee] = useState(null); // Selected employee
   const router = useRouter();
   const [totals, setTotals] = useState({
     subtotal: 0,
@@ -20,20 +22,25 @@ export default function PlaceOrder() {
     total: 0,
   });
 
-  // Fetch menu items and discounts on load
+  // Fetch menu items, discounts, and employees on load
   useEffect(() => {
     async function fetchData() {
       try {
-        const menuResponse = await fetch(`${API_BASE_URL}/menuItem`);
-        const discountsResponse = await fetch(`${API_BASE_URL}/discount`);
-        if (menuResponse.ok && discountsResponse.ok) {
+        const [menuResponse, discountsResponse, employeesResponse] = await Promise.all([
+          fetch(`${API_BASE_URL}/menuItem`),
+          fetch(`${API_BASE_URL}/discount`),
+          fetch(`${API_BASE_URL}/employee`), // Fetch employees
+        ]);
+
+        if (menuResponse.ok && discountsResponse.ok && employeesResponse.ok) {
           setMenuItems(await menuResponse.json());
           setDiscounts(await discountsResponse.json());
+          setEmployees(await employeesResponse.json()); // Set employee data
         } else {
-          console.error("Failed to fetch menu items or discounts.");
+          console.error("Failed to fetch data from the backend.");
         }
       } catch (error) {
-        console.error("Error:", error.message);
+        console.error("Error fetching data:", error.message);
       }
     }
     fetchData();
@@ -69,7 +76,9 @@ export default function PlaceOrder() {
   const handleSubmitOrder = async () => {
     const order = {
       date: new Date().toISOString(), // Current date and time
-      serverName: "Steve", // Example server name (replace with dynamic input if needed)
+      serverName: selectedEmployee
+      ? `${selectedEmployee.firstName} ${selectedEmployee.lastName}` // Ensure full name is selected
+      : "Unknown", // Selected employee name
       items: Object.entries(selectedItems).map(([id, quantity]) => {
         const item = menuItems.find((menuItem) => menuItem.id === parseInt(id));
         return {
@@ -86,10 +95,10 @@ export default function PlaceOrder() {
       total: totals.total,
       taxRate: 8, // Replace with your actual tax rate or make it dynamic
     };
+    console.log("Selected Employee:", selectedEmployee);
+    console.log(JSON.stringify(order, null, 2));
 
     try {
-      console.log("Order Payload:", JSON.stringify(order, null, 2)); // Log payload for debugging
-
       const response = await fetch(`${API_BASE_URL}/order`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -100,6 +109,7 @@ export default function PlaceOrder() {
         alert("Order placed successfully!");
         setSelectedItems({});
         setSelectedDiscount(null);
+        setSelectedEmployee(null); // Reset selected employee
       } else {
         const errorDetails = await response.json();
         console.error("Order Submission Error:", errorDetails);
@@ -138,6 +148,22 @@ export default function PlaceOrder() {
           ))}
         </div>
         <div>
+          <h2 className="text-xl font-semibold">Select Server</h2>
+          <select
+            value={selectedEmployee?.id || ""}
+            onChange={(e) =>
+              setSelectedEmployee(employees.find((emp) => emp.id === parseInt(e.target.value)))
+            }
+            className="w-full border p-2 mb-4"
+          >
+            <option value="">Select a server</option>
+            {employees.map((employee) => (
+              <option key={employee.id} value={employee.id}>
+                  {employee.firstName} {employee.lastName}
+              </option>
+            ))}
+          </select>
+
           <h2 className="text-xl font-semibold">Discounts</h2>
           <select
             value={selectedDiscount?.id || ""}

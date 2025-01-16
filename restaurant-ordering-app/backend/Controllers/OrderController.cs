@@ -18,6 +18,7 @@ namespace RestaurantOrderingApp.Backend.Controllers
         [HttpPost]
         public IActionResult PlaceOrder([FromBody] Order order)
         {
+            // Simulate fetching an employee from a data source (e.g., database)
             order.Id = Orders.Count + 1;
             order.Date = DateTime.UtcNow;
             Orders.Add(order);
