@@ -2,37 +2,40 @@ using RestaurantOrderingApp.Backend.Models;
 
 public class DiscountService
 {
-    public decimal ApplyDiscount(Order order, Discount discount)
+    public Order ApplyDiscount(Order order, Discount discount)
     {
         decimal totalBeforeDiscount = order.Subtotal;
-        
-        if (discount == null)
-            return totalBeforeDiscount; // No discount applied
-        
+
+        // Initialize discount amount
         decimal discountAmount = 0;
-        
-        // Apply discount based on type
-        if (discount.IsPercentage == true )
+
+        // Calculate discount if valid
+        if (discount != null && discount.Amount > 0)
         {
-            discountAmount = totalBeforeDiscount * (discount.Amount / 100);
+            if (discount.IsPercentage)
+            {
+                discountAmount = totalBeforeDiscount * (discount.Amount / 100);
+            }
+            else
+            {
+                discountAmount = discount.Amount;
+            }
+
+            // Ensure discount doesn't exceed subtotal
+            discountAmount = Math.Min(discountAmount, totalBeforeDiscount);
         }
-        else
-        {
-            discountAmount = discount.Amount;
-        }
-        
-        // Ensure discount doesn't exceed total
-        if (discountAmount > totalBeforeDiscount)
-        {
-            discountAmount = totalBeforeDiscount;
-        }
-        
-        // Subtract the discount from subtotal
-        decimal totalAfterDiscount = totalBeforeDiscount - discountAmount;
-        
-        // Recalculate taxes and final total after discount
-        decimal totalWithTax = totalAfterDiscount * (1 + order.TaxRate / 100);
-        
-        return totalWithTax; // Final total after applying discount and tax
+
+        // Calculate totals
+        decimal preTaxTotal = totalBeforeDiscount - discountAmount;
+        decimal taxAmount = preTaxTotal * (order.TaxRate / 100);
+        decimal total = preTaxTotal + taxAmount;
+
+        // Update order fields
+        order.DiscountAmount = discountAmount;
+        order.PreTaxTotal = preTaxTotal;
+        order.TaxAmount = taxAmount;
+        order.Total = total;
+
+        return order; // Return the updated order with all calculations
     }
 }

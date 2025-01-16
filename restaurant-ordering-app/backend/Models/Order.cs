@@ -5,7 +5,7 @@ namespace RestaurantOrderingApp.Backend.Models
         public int Id { get; set; }
         public DateTime Date { get; set; }
         public string ServerName { get; set; }
-        public List<OrderItem> Items { get; set; } = new();
+        public List<MenuItem> Items { get; set; } = new();
         public decimal Subtotal { get; set; }
         public decimal DiscountAmount { get; set; }
         public decimal PreTaxTotal { get; set; }

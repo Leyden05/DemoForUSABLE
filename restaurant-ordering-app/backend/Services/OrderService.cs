@@ -24,8 +24,11 @@ public class OrderService
             throw new InvalidOperationException("Only one discount can be applied to an order.");
         }
 
-        // Apply the discount (if any)
-        decimal subtotalAfterDiscount = _discountService.ApplyDiscount(order, discount);
+        // Apply the discount (if any) and get the updated order
+        Order updatedOrder = _discountService.ApplyDiscount(order, discount);
+
+        // Get the subtotal after discount from the updated order
+        decimal subtotalAfterDiscount = updatedOrder.PreTaxTotal;
 
         // Apply taxes
         decimal totalWithTaxes = _taxService.ApplyTaxes(subtotalAfterDiscount, taxes);

@@ -1,51 +1,141 @@
 "use client";
 
-import { useState } from 'react';
-import OrderForm from './components/OrderForm';
-import OrderSummary from './components/OrderSummary';
+import React, { useState, useEffect } from "react";
+
+// Mock API URL
+const API_BASE_URL = "http://localhost:5199/api";
 
 export default function PlaceOrder() {
-  // Example of managing state for the order data
-  const [order, setOrder] = useState({
-    items: [],
+  const [menuItems, setMenuItems] = useState([]);
+  const [selectedItems, setSelectedItems] = useState({});
+  const [discounts, setDiscounts] = useState([]);
+  const [selectedDiscount, setSelectedDiscount] = useState(null);
+  const [totals, setTotals] = useState({
+    subtotal: 0,
     discountAmount: 0,
+    preTaxTotal: 0,
     taxAmount: 0,
+    total: 0,
   });
 
-  const handleOrderChange = (newOrder) => {
-    setOrder(newOrder);
-  };
+  // Fetch menu items and discounts on load
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const menuResponse = await fetch(`${API_BASE_URL}/menuItem`);
+        const discountsResponse = await fetch(`${API_BASE_URL}/discount`);
+        if (menuResponse.ok && discountsResponse.ok) {
+          setMenuItems(await menuResponse.json());
+          setDiscounts(await discountsResponse.json());
+        } else {
+          console.error("Failed to fetch menu items or discounts.");
+        }
+      } catch (error) {
+        console.error("Error:", error.message);
+      }
+    }
+    fetchData();
+  }, []);
 
-  // Example of calculating totals based on order state
-  const calculateTotals = () => {
-    const subtotal = order.items.reduce((total, item) => total + item.price, 0);
-    const preTaxTotal = subtotal - order.discountAmount;
-    const taxAmount = preTaxTotal * 0.08; // example 8% tax
+  // Calculate totals dynamically
+  useEffect(() => {
+    const subtotal = Object.entries(selectedItems).reduce(
+      (total, [id, quantity]) =>
+        total +
+        quantity * (menuItems.find((item) => item.id === parseInt(id))?.price || 0),
+      0
+    );
+    const discountAmount = selectedDiscount
+      ? (subtotal * selectedDiscount.value) / 100
+      : 0;
+    const preTaxTotal = subtotal - discountAmount;
+    const taxAmount = preTaxTotal * 0.08; // 8% tax
     const total = preTaxTotal + taxAmount;
 
-    return { subtotal, preTaxTotal, taxAmount, total };
+    setTotals({ subtotal, discountAmount, preTaxTotal, taxAmount, total });
+  }, [selectedItems, selectedDiscount, menuItems]);
+
+  const handleItemChange = (id, quantity) => {
+    setSelectedItems((prev) => ({ ...prev, [id]: quantity }));
   };
 
-  const { subtotal, preTaxTotal, taxAmount, total } = calculateTotals();
+  const handleDiscountChange = (discountId) => {
+    setSelectedDiscount(discounts.find((d) => d.id === parseInt(discountId)));
+  };
+
+  const handleSubmitOrder = async () => {
+    const order = {
+      items: Object.entries(selectedItems).map(([id, quantity]) => ({
+        id: parseInt(id),
+        quantity,
+      })),
+      discountId: selectedDiscount?.id || null,
+    };
+    try {
+      const response = await fetch(`${API_BASE_URL}/orders`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(order),
+      });
+      if (response.ok) {
+        alert("Order placed successfully!");
+        setSelectedItems({});
+        setSelectedDiscount(null);
+      } else {
+        alert("Failed to place the order.");
+      }
+    } catch (error) {
+      console.error("Error:", error.message);
+    }
+  };
 
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-semibold mb-6">Place Meal Order</h1>
-      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="space-y-4">
-          {/* Order Form Section */}
-          <OrderForm onOrderChange={handleOrderChange} />
+        <div>
+          <h2 className="text-xl font-semibold">Menu Items</h2>
+          {menuItems.map((item) => (
+            <div key={item.id} className="flex justify-between items-center my-2">
+              <span>{item.name} (${item.price.toFixed(2)})</span>
+              <input
+                type="number"
+                min="0"
+                value={selectedItems[item.id] || 0}
+                onChange={(e) => handleItemChange(item.id, parseInt(e.target.value) || 0)}
+                className="w-16 border p-1"
+              />
+            </div>
+          ))}
         </div>
-        <div className="space-y-4">
-          {/* Order Summary Section */}
-          <OrderSummary
-            subtotal={subtotal}
-            discountAmount={order.discountAmount}
-            preTaxTotal={preTaxTotal}
-            taxAmount={taxAmount}
-            total={total}
-          />
+        <div>
+          <h2 className="text-xl font-semibold">Discounts</h2>
+          <select
+            value={selectedDiscount?.id || ""}
+            onChange={(e) => handleDiscountChange(e.target.value)}
+            className="w-full border p-2"
+          >
+            <option value="">Select a discount</option>
+            {discounts.map((discount) => (
+              <option key={discount.id} value={discount.id}>
+                {discount.name} ({discount.value}%)
+              </option>
+            ))}
+          </select>
+          <h2 className="text-xl font-semibold mt-6">Order Summary</h2>
+          <ul>
+            <li>Subtotal: ${totals.subtotal.toFixed(2)}</li>
+            <li>Discount: -${totals.discountAmount.toFixed(2)}</li>
+            <li>Pre-Tax Total: ${totals.preTaxTotal.toFixed(2)}</li>
+            <li>Tax: ${totals.taxAmount.toFixed(2)}</li>
+            <li>Total: ${totals.total.toFixed(2)}</li>
+          </ul>
+          <button
+            onClick={handleSubmitOrder}
+            className="mt-4 p-2 bg-blue-500 text-white w-full"
+          >
+            Submit Order
+          </button>
         </div>
       </div>
     </div>
