@@ -25,11 +25,12 @@ export default function PlaceOrder() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [menuResponse, discountsResponse, employeesResponse] = await Promise.all([
-          fetch(`${API_BASE_URL}/menuItem`),
-          fetch(`${API_BASE_URL}/discount`),
-          fetch(`${API_BASE_URL}/employee`),
-        ]);
+        const [menuResponse, discountsResponse, employeesResponse] =
+          await Promise.all([
+            fetch(`${API_BASE_URL}/menuItem`),
+            fetch(`${API_BASE_URL}/discount`),
+            fetch(`${API_BASE_URL}/employee`),
+          ]);
 
         if (menuResponse.ok && discountsResponse.ok && employeesResponse.ok) {
           setMenuItems(await menuResponse.json());
@@ -71,24 +72,27 @@ export default function PlaceOrder() {
   const handleDiscountChange = async (discountId) => {
     const selected = discounts.find((d) => d.id === parseInt(discountId));
     setSelectedDiscount(selected);
-    
+
     if (selected) {
       try {
-        const response = await fetch(`${API_BASE_URL}/discount/calculateDiscount`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            discountId: selected.id,
-            subtotal: totals.subtotal,
-          }),
-        });
-  
+        const response = await fetch(
+          `${API_BASE_URL}/discount/calculateDiscount`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              discountId: selected.id,
+              subtotal: totals.subtotal,
+            }),
+          }
+        );
+
         if (response.ok) {
           const { discountAmount } = await response.json();
           const preTaxTotal = totals.subtotal - discountAmount;
           const taxAmount = preTaxTotal * 0.08;
           const total = preTaxTotal + taxAmount;
-  
+
           setTotals((prev) => ({
             ...prev,
             discountAmount,
@@ -113,20 +117,19 @@ export default function PlaceOrder() {
       }));
     }
   };
-  
 
   const handleSubmitOrder = async () => {
     const order = {
       date: new Date().toISOString(),
       serverName: selectedEmployee
-      ? `${selectedEmployee.firstName} ${selectedEmployee.lastName}`
-      : "Unknown",
+        ? `${selectedEmployee.firstName} ${selectedEmployee.lastName}`
+        : "Unknown",
       items: Object.entries(selectedItems).map(([id, quantity]) => {
         const item = menuItems.find((menuItem) => menuItem.id === parseInt(id));
         return {
           id: parseInt(id),
-          name: item?.name || "Unknown Item", 
-          price: item?.price || 0, 
+          name: item?.name || "Unknown Item",
+          price: item?.price || 0,
           quantity,
         };
       }),
@@ -135,10 +138,10 @@ export default function PlaceOrder() {
       preTaxTotal: totals.preTaxTotal,
       taxAmount: totals.taxAmount,
       total: totals.total,
-      taxRate: 8, 
+      taxRate: 8,
     };
-    console.log("Selected Employee:", selectedEmployee);
-    console.log(JSON.stringify(order, null, 2));
+    // console.log("Selected Employee:", selectedEmployee);
+    // console.log(JSON.stringify(order, null, 2));
 
     try {
       const response = await fetch(`${API_BASE_URL}/order`, {
@@ -167,41 +170,77 @@ export default function PlaceOrder() {
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-semibold mb-6">Place Meal Order</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="p-6 rounded-xl outline outline-2 outline-slate-600">
-          <h2 className="text-xl font-semibold">Menu Items</h2>
-          {menuItems.map((item) => (
-            <div
-              key={item.id}
-              className="flex justify-between items-center my-2"
-            >
-              <span>
-                {item.name} (${item.price.toFixed(2)})
-              </span>
-              <input
-                type="number"
-                min="0"
-                value={selectedItems[item.id] || 0}
-                onChange={(e) =>
-                  handleItemChange(item.id, parseInt(e.target.value) || 0)
-                }
-                className="w-16 border p-1"
-              />
-            </div>
-          ))}
+        <div className="p-6 rounded-xl bg-neutral-800">
+          <h2 className="text-2xl font-bold mb-4 text-amber-400">Menu Items</h2>
+          <div className="bg-neutral-600 p-4 rounded-lg shadow-md">
+            {menuItems.map((item) => (
+              <div
+                key={item.id}
+                className="flex justify-between items-center bg-neutral-300 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow mb-3 last:mb-0"
+              >
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-700">
+                    {item.name}
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    ${item.price.toFixed(2)}
+                  </p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleItemChange(
+                        item.id,
+                        Math.max((selectedItems[item.id] || 0) - 1, 0)
+                      )
+                    }
+                    className="bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-600 transition"
+                  >
+                    −
+                  </button>
+                  <span className="text-lg font-semibold text-gray-700 w-8 text-center">
+                    {selectedItems[item.id] || 0}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleItemChange(
+                        item.id,
+                        (selectedItems[item.id] || 0) + 1
+                      )
+                    }
+                    className="bg-green-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-green-600 transition"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="p-6 rounded-xl outline outline-2 outline-slate-600">
+        <div className="p-6 rounded-xl bg-neutral-800">
           <h2 className="text-xl font-semibold">Select Server</h2>
           <select
+            id="server-select"
             value={selectedEmployee?.id || ""}
             onChange={(e) =>
-              setSelectedEmployee(employees.find((emp) => emp.id === parseInt(e.target.value)))
+              setSelectedEmployee(
+                employees.find((emp) => emp.id === parseInt(e.target.value))
+              )
             }
-            className="w-full border p-2 mb-4"
+            className="w-full border border-gray-300 bg-white text-gray-800 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none p-2 mb-4"
           >
-            <option value="">Select a server</option>
+            <option value="" disabled hidden>
+              Choose a server...
+            </option>
             {employees.map((employee) => (
-              <option key={employee.id} value={employee.id}>
-                  {employee.firstName} {employee.lastName}
+              <option
+                key={employee.id}
+                value={employee.id}
+                className="bg-gray-100 text-gray-800 hover:bg-gray-200"
+              >
+                {employee.firstName} {employee.lastName}
               </option>
             ))}
           </select>
@@ -210,7 +249,7 @@ export default function PlaceOrder() {
           <select
             value={selectedDiscount?.id || ""}
             onChange={(e) => handleDiscountChange(e.target.value)}
-            className="w-full border p-2"
+            className="w-full border border-gray-300 bg-white text-gray-800 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none p-2 mb-4"
           >
             <option value="">Select a discount</option>
             {discounts.map((discount) => (
@@ -229,13 +268,13 @@ export default function PlaceOrder() {
           </ul>
           <button
             onClick={handleSubmitOrder}
-            className="mt-4 p-2 bg-blue-500 text-white w-full"
+            className="mt-4 p-2 bg-blue-500 text-white w-full rounded-xl"
           >
             Submit Order
           </button>
           <button
             onClick={() => router.push("/orders")}
-            className="mt-4 p-2 bg-green-500 text-white w-full"
+            className="mt-4 p-2 bg-green-500 text-white w-full rounded-xl"
           >
             View All Orders
           </button>

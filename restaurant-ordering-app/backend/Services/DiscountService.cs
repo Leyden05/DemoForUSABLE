@@ -21,7 +21,6 @@ public class DiscountService
                 discountAmount = discount.Amount;
             }
 
-            // Ensure discount doesn't exceed subtotal
             discountAmount = Math.Min(discountAmount, totalBeforeDiscount);
         }
 

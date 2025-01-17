@@ -36,12 +36,12 @@ export default function Orders() {
             className="border rounded-lg p-4 shadow hover:shadow-lg transition"
           >
             <h2 className="text-xl font-bold mb-2">Order #{order.id}</h2>
-            <p className="text-gray-600 mb-1">Date: {new Date(order.date).toLocaleString()}</p>
-            <p className="text-gray-600">Server: {order.serverName}</p>
-            <p className="text-gray-600 mb-1">Subtotal: ${order.subtotal.toFixed(2)}</p>
-            <p className="text-gray-600 mb-1">Discount: -${order.discountAmount.toFixed(2)}</p>
-            <p className="text-gray-600 mb-1">Tax: ${order.taxAmount.toFixed(2)}</p>
-            <p className="text-gray-600 font-bold">Total: ${order.total.toFixed(2)}</p>
+            <p className="text-gray-400 mb-1">Date: {new Date(order.date).toLocaleString()}</p>
+            <p className="text-gray-400">Server: {order.serverName}</p>
+            <p className="text-gray-400 mb-1">Subtotal: ${order.subtotal.toFixed(2)}</p>
+            <p className="text-gray-400 mb-1">Discount: -${order.discountAmount.toFixed(2)}</p>
+            <p className="text-gray-400 mb-1">Tax: ${order.taxAmount.toFixed(2)}</p>
+            <p className="text-gray-400 font-bold">Total: ${order.total.toFixed(2)}</p>
             <h3 className="text-lg font-semibold mt-4">Items:</h3>
             <ul className="list-disc list-inside">
               {order.items.map((item, index) => (
@@ -56,7 +56,7 @@ export default function Orders() {
       <div className="w-full flex justify-center">
         <button
             onClick={() => router.push("/place-order")}
-            className="mt-4 p-2 bg-green-500 text-white w-1/2"
+            className="mt-4 p-2 bg-green-500 text-white w-1/2 rounded-xl"
           >
             Back to Place Order
           </button>

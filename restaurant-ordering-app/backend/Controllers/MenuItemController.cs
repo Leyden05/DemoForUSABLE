@@ -9,8 +9,11 @@ namespace RestaurantOrderingApp.Backend.Controllers
     {
         private static readonly List<MenuItem> MenuItems = new()
         {
-            new MenuItem { Id = 1, Name = "Hamburger", Quantity = 1, Price = 10.00m },
-            new MenuItem { Id = 2, Name = "Fries", Quantity = 2, Price = 5.00m }
+            new MenuItem { Id = 1, Name = "Single Hamburger", Quantity = 1, Price = 8.00m },
+            new MenuItem { Id = 2, Name = "Double Hamburger", Quantity = 1, Price = 9.00m },
+            new MenuItem { Id = 4, Name = "Fries", Quantity = 1, Price = 5.00m },
+            new MenuItem { Id = 5, Name = "Soft Drink", Quantity = 1, Price = 3.00m },
+            new MenuItem { Id = 6, Name = "Cookie", Quantity = 1, Price = 2.00m }
         };
 
         [HttpGet]
