@@ -90,7 +90,7 @@ export default function PlaceOrder() {
         if (response.ok) {
           const { discountAmount } = await response.json();
           const preTaxTotal = totals.subtotal - discountAmount;
-          const taxAmount = preTaxTotal * 0.08;
+          const taxAmount = preTaxTotal * (0.05 + 0.03);
           const total = preTaxTotal + taxAmount;
 
           setTotals((prev) => ({
@@ -119,6 +119,11 @@ export default function PlaceOrder() {
   };
 
   const handleSubmitOrder = async () => {
+    let { discountAmount, preTaxTotal } = totals;
+    if (discountAmount > preTaxTotal) {
+      discountAmount = preTaxTotal;
+    }
+    
     const order = {
       date: new Date().toISOString(),
       serverName: selectedEmployee
