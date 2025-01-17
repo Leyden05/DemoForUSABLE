@@ -40,6 +40,7 @@ export default function Orders() {
             <p className="text-gray-400">Server: {order.serverName}</p>
             <p className="text-gray-400 mb-1">Subtotal: ${order.subtotal.toFixed(2)}</p>
             <p className="text-gray-400 mb-1">Discount: -${order.discountAmount.toFixed(2)}</p>
+            <p className="text-gray-400 mb-1">Pre-Tax Total: ${order.preTaxTotal.toFixed(2)}</p>
             <p className="text-gray-400 mb-1">Tax: ${order.taxAmount.toFixed(2)}</p>
             <p className="text-gray-400 font-bold">Total: ${order.total.toFixed(2)}</p>
             <h3 className="text-lg font-semibold mt-4">Items:</h3>

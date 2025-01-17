@@ -252,12 +252,21 @@ export default function PlaceOrder() {
             className="w-full border border-gray-300 bg-white text-gray-800 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none p-2 mb-4"
           >
             <option value="">Select a discount</option>
-            {discounts.map((discount) => (
-              <option key={discount.id} value={discount.id}>
-                {discount.name} ({discount.value}%)
-              </option>
-            ))}
+            {discounts.map((discount) => {
+              let displayValue;
+              if (discount.isPercentage) {
+                displayValue = `(${discount.amount}%)`;
+              } else {
+                displayValue = `($${discount.amount})`;
+              }
+              return (
+                <option key={discount.id} value={discount.id}>
+                  {discount.name} {displayValue}
+                </option>
+              );
+            })}
           </select>
+
           <h2 className="text-xl font-semibold mt-6">Order Summary</h2>
           <ul>
             <li>Subtotal: ${totals.subtotal.toFixed(2)}</li>
