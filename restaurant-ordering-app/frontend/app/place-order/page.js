@@ -123,7 +123,7 @@ export default function PlaceOrder() {
     if (discountAmount > preTaxTotal) {
       discountAmount = preTaxTotal;
     }
-    
+
     const order = {
       date: new Date().toISOString(),
       serverName: selectedEmployee
@@ -273,7 +273,7 @@ export default function PlaceOrder() {
           </select>
 
           <h2 className="text-xl font-semibold mt-6">Order Summary</h2>
-          <ul>
+          <ul className="mb-4">
             <li>Subtotal: ${totals.subtotal.toFixed(2)}</li>
             <li>Discount: -${totals.discountAmount.toFixed(2)}</li>
             <li>Pre-Tax Total: ${totals.preTaxTotal.toFixed(2)}</li>
@@ -291,6 +291,12 @@ export default function PlaceOrder() {
             className="mt-4 p-2 bg-green-500 text-white w-full rounded-xl"
           >
             View All Orders
+          </button>
+          <button
+            onClick={() => router.push("/ohcrud")}
+            className="mt-4 p-2 bg-neutral-500 text-white w-full rounded-xl"
+          >
+            Edit Items
           </button>
         </div>
       </div>
