@@ -90,7 +90,7 @@ export default function PlaceOrder() {
         if (response.ok) {
           const { discountAmount } = await response.json();
           const preTaxTotal = totals.subtotal - discountAmount;
-          const taxAmount = preTaxTotal * (0.05 + 0.03);
+          const taxAmount = preTaxTotal * 0.08;
           const total = preTaxTotal + taxAmount;
 
           setTotals((prev) => ({
@@ -143,10 +143,10 @@ export default function PlaceOrder() {
       preTaxTotal: totals.preTaxTotal,
       taxAmount: totals.taxAmount,
       total: totals.total,
-      taxRate: 8,
+      taxRate: 0.08,
     };
-    // console.log("Selected Employee:", selectedEmployee);
-    // console.log(JSON.stringify(order, null, 2));
+    console.log('Pre-Tax Total:', totals.preTaxTotal);
+    console.log('Tax Amount:', totals.taxAmount);
 
     try {
       const response = await fetch(`${API_BASE_URL}/order`, {
