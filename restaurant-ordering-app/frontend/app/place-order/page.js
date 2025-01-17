@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-// Mock API URL
 const API_BASE_URL = "http://localhost:5199/api";
 
 export default function PlaceOrder() {
@@ -11,8 +10,8 @@ export default function PlaceOrder() {
   const [selectedItems, setSelectedItems] = useState({});
   const [discounts, setDiscounts] = useState([]);
   const [selectedDiscount, setSelectedDiscount] = useState(null);
-  const [employees, setEmployees] = useState([]); // For employee data
-  const [selectedEmployee, setSelectedEmployee] = useState(null); // Selected employee
+  const [employees, setEmployees] = useState([]);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
   const router = useRouter();
   const [totals, setTotals] = useState({
     subtotal: 0,
@@ -29,13 +28,13 @@ export default function PlaceOrder() {
         const [menuResponse, discountsResponse, employeesResponse] = await Promise.all([
           fetch(`${API_BASE_URL}/menuItem`),
           fetch(`${API_BASE_URL}/discount`),
-          fetch(`${API_BASE_URL}/employee`), // Fetch employees
+          fetch(`${API_BASE_URL}/employee`),
         ]);
 
         if (menuResponse.ok && discountsResponse.ok && employeesResponse.ok) {
           setMenuItems(await menuResponse.json());
           setDiscounts(await discountsResponse.json());
-          setEmployees(await employeesResponse.json()); // Set employee data
+          setEmployees(await employeesResponse.json());
         } else {
           console.error("Failed to fetch data from the backend.");
         }
@@ -59,7 +58,7 @@ export default function PlaceOrder() {
       ? (subtotal * selectedDiscount.value) / 100
       : 0;
     const preTaxTotal = subtotal - discountAmount;
-    const taxAmount = preTaxTotal * 0.08; // 8% tax
+    const taxAmount = preTaxTotal * 0.08;
     const total = preTaxTotal + taxAmount;
 
     setTotals({ subtotal, discountAmount, preTaxTotal, taxAmount, total });
@@ -69,22 +68,65 @@ export default function PlaceOrder() {
     setSelectedItems((prev) => ({ ...prev, [id]: quantity }));
   };
 
-  const handleDiscountChange = (discountId) => {
-    setSelectedDiscount(discounts.find((d) => d.id === parseInt(discountId)));
+  const handleDiscountChange = async (discountId) => {
+    const selected = discounts.find((d) => d.id === parseInt(discountId));
+    setSelectedDiscount(selected);
+    
+    if (selected) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/discount/calculateDiscount`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            discountId: selected.id,
+            subtotal: totals.subtotal,
+          }),
+        });
+  
+        if (response.ok) {
+          const { discountAmount } = await response.json();
+          const preTaxTotal = totals.subtotal - discountAmount;
+          const taxAmount = preTaxTotal * 0.08;
+          const total = preTaxTotal + taxAmount;
+  
+          setTotals((prev) => ({
+            ...prev,
+            discountAmount,
+            preTaxTotal,
+            taxAmount,
+            total,
+          }));
+        } else {
+          console.error("Failed to calculate discount.");
+          console.log("Response from server:", { discountAmount });
+        }
+      } catch (error) {
+        console.error("Error calculating discount:", error.message);
+      }
+    } else {
+      setTotals((prev) => ({
+        ...prev,
+        discountAmount: 0,
+        preTaxTotal: prev.subtotal,
+        taxAmount: prev.subtotal * 0.08,
+        total: prev.subtotal + prev.subtotal * 0.08,
+      }));
+    }
   };
+  
 
   const handleSubmitOrder = async () => {
     const order = {
-      date: new Date().toISOString(), // Current date and time
+      date: new Date().toISOString(),
       serverName: selectedEmployee
-      ? `${selectedEmployee.firstName} ${selectedEmployee.lastName}` // Ensure full name is selected
-      : "Unknown", // Selected employee name
+      ? `${selectedEmployee.firstName} ${selectedEmployee.lastName}`
+      : "Unknown",
       items: Object.entries(selectedItems).map(([id, quantity]) => {
         const item = menuItems.find((menuItem) => menuItem.id === parseInt(id));
         return {
           id: parseInt(id),
-          name: item?.name || "Unknown Item", // Include item name for clarity
-          price: item?.price || 0, // Include item price for clarity
+          name: item?.name || "Unknown Item", 
+          price: item?.price || 0, 
           quantity,
         };
       }),
@@ -93,7 +135,7 @@ export default function PlaceOrder() {
       preTaxTotal: totals.preTaxTotal,
       taxAmount: totals.taxAmount,
       total: totals.total,
-      taxRate: 8, // Replace with your actual tax rate or make it dynamic
+      taxRate: 8, 
     };
     console.log("Selected Employee:", selectedEmployee);
     console.log(JSON.stringify(order, null, 2));
@@ -125,7 +167,7 @@ export default function PlaceOrder() {
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-semibold mb-6">Place Meal Order</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div>
+        <div className="p-6 rounded-xl outline outline-2 outline-slate-600">
           <h2 className="text-xl font-semibold">Menu Items</h2>
           {menuItems.map((item) => (
             <div
@@ -147,7 +189,7 @@ export default function PlaceOrder() {
             </div>
           ))}
         </div>
-        <div>
+        <div className="p-6 rounded-xl outline outline-2 outline-slate-600">
           <h2 className="text-xl font-semibold">Select Server</h2>
           <select
             value={selectedEmployee?.id || ""}

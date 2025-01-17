@@ -2,6 +2,8 @@ namespace RestaurantOrderingApp.Backend.Controllers
 {
     using Microsoft.AspNetCore.Mvc;
     using RestaurantOrderingApp.Backend.Models;
+    using System.Linq;
+    using System.Collections.Generic;
 
     [Route("api/[controller]")]
     [ApiController]
@@ -18,6 +20,35 @@ namespace RestaurantOrderingApp.Backend.Controllers
         public IActionResult GetDiscounts()
         {
             return Ok(Discounts);
+        }
+
+        [HttpPost("calculateDiscount")]
+        public IActionResult CalculateDiscount([FromBody] DiscountRequest request)
+        {
+            // Look up the discount in the static Discounts list
+            var discount = Discounts.FirstOrDefault(d => d.Id == request.DiscountId);
+            if (discount == null)
+            {
+                return BadRequest(new { message = "Discount not found" });
+            }
+
+            decimal discountAmount = 0;
+            if (discount.IsPercentage)
+            {
+                discountAmount = (request.Subtotal * discount.Amount) / 100;
+            }
+            else
+            {
+                discountAmount = discount.Amount;
+            }
+
+            return Ok(new { discountAmount });
+        }
+
+        public class DiscountRequest
+        {
+            public int DiscountId { get; set; }
+            public decimal Subtotal { get; set; }
         }
 
         [HttpPost]

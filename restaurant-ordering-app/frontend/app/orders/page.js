@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 const API_BASE_URL = "http://localhost:5199/api";
 
 export default function Orders() {
   const [orders, setOrders] = useState([]);
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchOrders() {
@@ -51,6 +53,14 @@ export default function Orders() {
           </div>
         ))}
       </div>
+      <div className="w-full flex justify-center">
+        <button
+            onClick={() => router.push("/place-order")}
+            className="mt-4 p-2 bg-green-500 text-white w-1/2"
+          >
+            Back to Place Order
+          </button>
+        </div>
     </div>
   );
 }

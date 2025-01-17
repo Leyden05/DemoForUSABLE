@@ -9,8 +9,10 @@ namespace RestaurantOrderingApp.Backend.Controllers
     {
         private static readonly List<Employee> Employees = new()
         {
-            new Employee { Id = 1, FirstName = "John", LastName = "Johnbouy" },
-            new Employee { Id = 2, FirstName = "Steve", LastName = "Stevie" }
+            new Employee { Id = 1, FirstName = "John", LastName = "Johnson" },
+            new Employee { Id = 2, FirstName = "Steve", LastName = "Stevenson" },
+            new Employee { Id = 3, FirstName = "Mary", LastName = "Maryson" },
+            new Employee { Id = 4, FirstName = "Phillip", LastName = "Philson" }
         };
 
         [HttpGet]
